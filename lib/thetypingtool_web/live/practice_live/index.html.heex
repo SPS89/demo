@@ -1,0 +1,40 @@
+<.header>
+  Listing Typing practices
+  <:actions>
+    <.link patch={~p"/typing_practices/new"}>
+      <.button>New Practice</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="typing_practices"
+  rows={@streams.typing_practices}
+  row_click={fn {_id, practice} -> JS.navigate(~p"/typing_practices/#{practice}") end}
+>
+  <:action :let={{_id, practice}}>
+    <div class="sr-only">
+      <.link navigate={~p"/typing_practices/#{practice}"}>Show</.link>
+    </div>
+    <.link patch={~p"/typing_practices/#{practice}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, practice}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: practice.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="practice-modal" show on_cancel={JS.patch(~p"/typing_practices")}>
+  <.live_component
+    module={ThetypingtoolWeb.PracticeLive.FormComponent}
+    id={@practice.id || :new}
+    title={@page_title}
+    action={@live_action}
+    practice={@practice}
+    patch={~p"/typing_practices"}
+  />
+</.modal>

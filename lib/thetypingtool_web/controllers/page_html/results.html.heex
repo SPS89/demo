@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Test Results</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/lesson1">📖 Lesson 1</a></li>
+            <li><a href="/lesson2">📖 Lesson 2</a></li>
+            <li><a href="/lesson3">📖 Lesson 3</a></li>
+            <li><a href="/practice">⌨️ Practice</a></li>
+            <li><a href="/results">📊 Results</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h2>Typing Test Results</h2>
+        <p>Words Per Minute (WPM): <span id="wpm"></span></p>
+        <p>Accuracy: <span id="accuracy"></span>%</p>
+        <p>Errors: <span id="errors"></span></p>
+        <button onclick="window.location.href='/'">Try Again</button>
+        <button onclick="goToNextPage()">Next lesson1</button> 
+    </div>
+
+    <script>
+        // document.getElementById("wpm").innerText = localStorage.getItem("wpm");
+        // document.getElementById("accuracy").innerText = localStorage.getItem("accuracy");
+        // document.getElementById("errors").innerText = localStorage.getItem("errors");
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("wpm").innerText = localStorage.getItem("wpm") || "0";
+            document.getElementById("accuracy").innerText = localStorage.getItem("accuracy") || "100";
+            document.getElementById("errors").innerText = localStorage.getItem("errors") || "0";
+        });
+        
+        //console.log(`Typing Test Completed!\nWPM: ${wpm.innerText}\nAccuracy: ${accuracy.innerText}\nErrors: ${error.innerText}\nProgress: ${progress.innerText}\nTime: ${timer.innerText}`);
+        function goToNextPage() {
+            window.location.href = "/lesson1"; // Change this to the actual next page route
+        }
+        // // Retrieve lesson 1 results from localStorage
+        // document.addEventListener("DOMContentLoaded", function () {
+        // document.getElementById("lesson1-wpm").innerText = localStorage.getItem("lesson1-wpm") || "0";
+        // document.getElementById("lesson1-accuracy").innerText = localStorage.getItem("lesson1-accuracy") || "100";
+        // document.getElementById("lesson1-errors").innerText = localStorage.getItem("lesson1-errors") || "0";
+        // });
+
+
+
+    </script>
+    
+  
+</body>
+</html>

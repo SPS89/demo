@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 1: Typing Practice</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/lesson1">📖 Lesson 1</a></li>
+            <li><a href="/lesson2">📖 Lesson 2</a></li>
+            <li><a href="/lesson3">📖 Lesson 3</a></li>
+            <li><a href="/practice">⌨️ Practice</a></li>
+            <li><a href="/results">📊 Results</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>Lesson 1: Typing Practice</h1>
+        <p>Type the letters shown below:</p>
+
+        <p class="sample-text" id="sampleText"></p>
+        <p class="sample-text" id="highlightedText"></p>
+       
+
+        <textarea id="user-input" placeholder="Start typing here..." oninput="checkTyping()" autofocus></textarea>
+        
+        <div class="timer">Time: <span id="timer">0</span> sec</div>
+        <div class="progress">Progress: <span id="progress">0</span>%</div>
+    
+        <div class="stats">
+            <p>Words Per Minute (WPM): <span id="wpm">0</span></p>
+            <p>Accuracy: <span id="accuracy">100%</span></p>
+            <p class="error-count">Errors: <span id="errors">0</span></p>
+        </div>
+        
+        <!-- Submit Button for Lesson 1 -->
+        <button id="submit-lesson1">Submit Lesson 1</button>
+
+        <!-- Lesson 1 Result Display Section -->
+        <div id="lesson1-result" style="display: none; margin-top: 20px; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);">
+            <h2>Lesson 1 Result</h2>
+            <p><strong>Words Per Minute (WPM):</strong> <span id="lesson1-wpm">0</span></p>
+            <p><strong>Accuracy:</strong> <span id="lesson1-accuracy">100</span>%</p>
+            <p><strong>Total Errors:</strong> <span id="lesson1-errors">0</span></p>
+        </div>
+
+        <button id="next-lesson" onclick="window.location.href='/lesson2'" style="display:none;">Next Lesson</button>
+        <button onclick="window.location.href='/'">Back to Home</button>
+    </div>
+
+    <script>
+        const textSamples = ["a", "aa", "ab", "b", "bb", "bc", "cc", "cb", "db","bd", "sd", "ef", "eu", "eg", "gh", "hi", "ho","hy","hi"];
+        const sampleText = document.getElementById("sampleText");
+        const typingArea = document.getElementById("user-input");
+        const highlightedText = document.getElementById("highlightedText");
+        const wpmDisplay = document.getElementById("wpm");
+        const accuracyDisplay = document.getElementById("accuracy");
+        const errorDisplay = document.getElementById("errors");
+        const timerDisplay = document.getElementById("timer");
+        const progressDisplay = document.getElementById("progress");
+        const submitLesson1Btn = document.getElementById("submit-lesson1");
+        const lesson1ResultSection = document.getElementById("lesson1-result");
+        const lesson1WpmDisplay = document.getElementById("lesson1-wpm");
+        const lesson1AccuracyDisplay = document.getElementById("lesson1-accuracy");
+        const lesson1ErrorsDisplay = document.getElementById("lesson1-errors");
+        const nextLessonBtn = document.getElementById("next-lesson");
+
+        let startTime = null;
+        let correctChars = 0;
+        let errorCount = 0;
+        let timerInterval;
+        let isCompleted = false;
+        
+        // Set the sample text to the list of words joined with spaces
+        let targetText = textSamples.join(" ");
+        sampleText.innerText = targetText;
+        updateHighlightedText("");
+
+        function updateHighlightedText(userText) {
+            let highlightedHTML = "";
+            errorCount = 0;
+            for (let i = 0; i < targetText.length; i++) {
+                if (i < userText.length) {
+                    if (userText[i] === targetText[i]) {
+                        highlightedHTML += `<span class="correct">${targetText[i]}</span>`;
+                    } else {
+                        highlightedHTML += `<span class="incorrect">${targetText[i]}</span>`;
+                        errorCount++;
+                    }
+                } else {
+                    highlightedHTML += `<span>${targetText[i]}</span>`;
+                }
+            }
+
+            highlightedText.innerHTML = highlightedHTML;
+        }
+
+        function updateStats(userText) {
+            const elapsedTime = (new Date().getTime() - startTime) / 60000; // Convert milliseconds to minutes
+            const wordsTyped = userText.trim().split(/\s+/).length;
+            wpmDisplay.innerText = elapsedTime > 0 ? Math.round(wordsTyped / elapsedTime) : 0;
+            const accuracy = userText.length > 0 ? Math.round((correctChars / userText.length) * 100) : 100;
+            accuracyDisplay.innerText = accuracy + "%";
+            errorDisplay.innerText = errorCount;
+        }
+
+        function updateProgress(userText) {    
+            const progress = Math.round((userText.length / targetText.length) * 100);
+            progressDisplay.innerText = progress;
+            if (progress >= 100) {
+                stopTimer();
+                isCompleted = true;
+                submitLesson1Btn.disabled = false;
+            }
+        }
+
+        typingArea.addEventListener("input", function () {
+            if (isCompleted) return;
+
+            const userText = typingArea.value;
+            
+            if (!startTime) {
+                startTime = new Date().getTime();
+                startTimer();
+            }
+
+            updateHighlightedText(userText);
+            updateStats(userText);
+            updateProgress(userText);
+
+            correctChars = userText.split('').filter((char, i) => char === targetText[i]).length;
+        });
+
+        function startTimer() {
+            let seconds = 0;
+            console.log("Timer started!");
+            timerInterval = setInterval(() => {
+                seconds++;
+                timerDisplay.innerText = seconds;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        submitLesson1Btn.addEventListener("click", function () {
+            stopTimer();
+            typingArea.disabled = true;
+            submitLesson1Btn.disabled = true;
+            lesson1WpmDisplay.innerText = wpmDisplay.innerText;
+            lesson1AccuracyDisplay.innerText = accuracyDisplay.innerText;
+            lesson1ErrorsDisplay.innerText = errorDisplay.innerText;
+
+            lesson1ResultSection.style.display = "block"; // Show Lesson 1 result section
+            nextLessonBtn.style.display = "inline-block"; // Show Next Lesson button
+        });
+
+
+        updateHighlightedText("");
+
+        document.getElementById("show-result-btn").addEventListener("click", function () {
+            const lesson1Result = lessonResults["Lesson 1"];
+        
+            if (lesson1Result) {
+                document.getElementById("current-result").style.display = "block";
+                document.getElementById("current-wpm").innerText = lesson1Result.wpm;
+                document.getElementById("current-accuracy").innerText = lesson1Result.accuracy;
+                document.getElementById("current-errors").innerText = lesson1Result.errors;
+            } else {
+                alert("No result found for Lesson 1. Please complete the exercise.");
+            }
+        });
+        // function generateText() {
+        //     fullText = "";
+
+        //     for (let i = 0; i < totalRounds; i++) {
+        //         fullText += textSamples[Math.floor(Math.random() * textSamples.length)] + " ";
+        //     }
+        //         fullText = fullText.trim();
+        //         document.getElementById("random-text").innerText =  fullText;
+        //         document.getElementById("typed-output").innerHTML = "";
+        //         document.getElementById("user-input").value = "";
+        //         document.getElementById("result").innerText = "";
+        //         document.getElementById("round-count").innerText = totalRounds;
+        //         mistakeCount = 0;
+        //         updateProgressBar();
+        //     // } else {
+               
+        //     //     showResults();
+            
+        // }
+
+        function checkTyping() {
+            const typed = document.getElementById("user-input").value;
+            
+            let highlightedText = "";
+            let errors = 0;
+            let correctChars = 0;
+
+            for (let i = 0; i < typed.length; i++) {
+                if (typed[i] === targetText[i]) {
+                    highlightedText += `<span class="correct">${typed[i]}</span>`;
+                } else {
+                    highlightedText += `<span class="wrong">${typed[i] || " "}</span>`;
+                    errors++;
+                }
+            }
+
+            document.getElementById("typed-output").innerHTML = highlightedText;
+            mistakeCount = errors;
+            updateProgressBar();
+
+            // Update mistake count only when the user has completed the word
+            if (typed.length >= fullText.length) {
+                showResults();
+            }
+        }
+
+        // function showResults() {
+        //     document.getElementById("text-container").innerHTML = `<h2>Results</h2>
+        //         <p>Correct Characters Typed: ${fullText.length - mistakeCount} / ${fullText.length}</p>
+        //         <p>Total Mistakes: ${mistakeCount}</p>`;
+        //     document.getElementById("user-input").style.display = "none";
+        //     document.getElementById("typed-output").style.display = "none";
+        //     document.getElementById("result").style.display = "none";
+        //     document.getElementById("next-lesson").style.display = "inline";
+        // }
+
+        // function updateProgressBar() {
+        //     const typedLength = document.getElementById("user-input").value.length;
+        //     const progress = (typedLength / fullText.length) * 100;
+        //     document.getElementById("progress-bar").style.width = progress + "%";
+        // }
+
+        // window.onload = generateText;
+    </script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #74ebd5, #acb6e5);
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 700px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 14px;
+            color: #444;
+        }
+
+        #text-container {
+            font-size: 22px;
+            font-weight: bold;
+            background: #e3eaf4;
+            padding: 12px;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .typing-box {
+            position: relative;
+            display: inline-block;
+            background:  #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        #typed-output {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            font-size: 18px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .correct {
+            color: #2ECC71;
+            font-weight: bold;
+        }
+
+        .wrong {
+            color: #E74C3C;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: #e0e0e0;
+            border-radius: 5px;
+            height: 10px;
+            margin: 20px 0;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: #2ECC71;
+            width: 0%;
+            transition: 0.5s;
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<div>
+ <h1><%= @message %></h1>
+</div>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Practice</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/lesson1">📖 Lesson 1</a></li>
+            <li><a href="/lesson2">📖 Lesson 2</a></li>
+            <li><a href="/lesson3">📖 Lesson 3</a></li>
+            <li><a href="/practice">⌨️ Practice</a></li>
+            <li><a href="/results">📊 Results</a></li>
+        </ul>
+    </nav>
+<div class="container">
+    <h2>Typing Practice</h2>
+    <p class="sample-text" id="sampleText">The quick brown fox jumps over the lazy dog.</p>
+    <p class="sample-text" id="highlightedText"></p>
+
+    <textarea id="typingArea" placeholder="Start typing here..."></textarea>
+    
+    <div class="timer">Time: <span id="timer">0</span> sec</div>
+    <div class="progress">Progress: <span id="progress">0</span>%</div>
+
+    <div class="stats">
+        <p>Words Per Minute (WPM): <span id="wpm">0</span></p>
+        <p>Accuracy: <span id="accuracy">100%</span></p>
+        <p class="error-count">Errors: <span id="errors">0</span></p>
+    </div>
+
+    <button id="submitBtn" disabled>Submit</button>
+</div>
+
+<script>
+    const sampleText = document.getElementById("sampleText").innerText;
+    const typingArea = document.getElementById("typingArea");
+    const highlightedText = document.getElementById("highlightedText");
+    const wpmDisplay = document.getElementById("wpm");
+    const accuracyDisplay = document.getElementById("accuracy");
+    const errorDisplay = document.getElementById("errors");
+    const timerDisplay = document.getElementById("timer");
+    const progressDisplay = document.getElementById("progress");
+    const submitBtn = document.getElementById("submitBtn");
+
+    let startTime = null;
+    let correctChars = 0;
+    let errorCount = 0;
+    let timerInterval;
+    let isCompleted = false;
+
+    function updateHighlightedText(userText) {
+        let highlightedHTML = "";
+        errorCount = 0;
+
+        for (let i = 0; i < sampleText.length; i++) {
+            if (i < userText.length) {
+                if (userText[i] === sampleText[i]) {
+                    highlightedHTML += `<span class="correct">${sampleText[i]}</span>`;
+                }  
+                else if (sampleText[i] === ' ' && userText[i] !== ' ') {
+                    highlightedHTML += `<span class="incorrect">_</span>`; // Indicate missing space
+                    errorCount++;
+                } 
+                else {
+                    highlightedHTML += `<span class="incorrect">${sampleText[i]}</span>`;
+                    errorCount++;
+                }
+            } else {
+                highlightedHTML += `<span>${sampleText[i]}</span>`;
+            }
+        }
+
+        highlightedText.innerHTML = highlightedHTML;
+    }
+
+    function updateStats(userText) {
+
+        const elapsedTime = (new Date().getTime() - startTime) / 60000; // Convert milliseconds to minutes
+        const wordsTyped = userText.trim().split(/\s+/).length; // Count words typed
+
+
+        wpmDisplay.innerText = elapsedTime > 0 ? Math.round(wordsTyped / elapsedTime) : 0;
+
+        const accuracy = userText.length > 0 ? Math.round((correctChars / userText.length) * 100) : 100;
+        accuracyDisplay.innerText = accuracy + "%";
+
+
+        errorDisplay.innerText = errorCount;
+    }
+
+    function updateprogress(userText){    
+        const progress = Math.round((userText.length / sampleText.length) * 100);
+        progressDisplay.innerText = progress;
+            if (progress == 100) {
+                submitBtn.disabled= false;
+                stopTimer();
+                isCompleted = true;
+            }
+    }
+
+    typingArea.addEventListener("input", function () {
+        if (isCompleted) return;
+
+        const userText = typingArea.value;
+        
+        if (!startTime) {
+            startTime = new Date().getTime();
+            startTimer();
+        }
+
+        updateHighlightedText(userText);
+        updateStats(userText);
+        updateprogress(userText);
+
+        correctChars = userText.split('').filter((char, i) => char === sampleText[i]).length;
+        
+        
+    });
+
+    function startTimer() {
+        let seconds = 0;
+        timerInterval = setInterval(() => {
+            seconds++;
+            timerDisplay.innerText = seconds;
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
+    submitBtn.addEventListener("click", function () {
+        stopTimer();
+        typingArea.disabled = true;
+        submitBtn.enabled = true;
+        // alert(`Typing Test Completed!\nWPM: ${wpmDisplay.innerText}\nAccuracy: ${accuracyDisplay.innerText}\nErrors: ${errorDisplay.innerText}\nProgress: ${progressDisplay.innerText}\nTime: ${timerDisplay.innerText}`);
+       // Store test results in localStorage
+        localStorage.setItem("wpm", wpmDisplay.innerText);
+        localStorage.setItem("accuracy", accuracyDisplay.innerText.replace("%", ""));
+        localStorage.setItem("errors", errorDisplay.innerText);
+
+        window.location.href = "/results";
+        // const wpm = wpmDisplay.innerText;
+        // const accuracy = accuracyDisplay.innerText.replace("%", "");
+        // const errors = errorDisplay.innerText;
+        // const time = timerDisplay.innerText;
+
+        // // Send data to the backend
+        // fetch("/submit", {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/x-www-form-urlencoded",
+        //     },
+        // body: `wpm=${wpm}&accuracy=${accuracy}&errors=${errors}&time=${time}`
+        // }).then(response => {
+        //     if (response.ok) {
+        //         window.location.href = "/results";  // Redirect to results page
+        //     }
+        // });
+    });
+
+    updateHighlightedText("");
+</script>
+
+</body>
+</html>
