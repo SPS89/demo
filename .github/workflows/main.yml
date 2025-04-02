@@ -1,0 +1,55 @@
+name: Deploy Phoenix App to AWS EC2
+
+on:
+  push:
+    branches:
+      - main  # Change this if you're using another branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Elixir and Erlang
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: 26  # Update to match your version
+          elixir-version: 1.15  # Update to match your version
+
+      - name: Install Dependencies
+        run: |
+          mix deps.get
+          mix deps.compile
+
+      - name: Run Tests
+        run: mix test
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to AWS EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ secrets.EC2_PUBLIC_IP }}
+          USER: ubuntu  # Change this if using a different user
+        run: |
+          echo "$PRIVATE_KEY" > deploy_key.pem
+          chmod 600 deploy_key.pem
+          ssh -o StrictHostKeyChecking=no -i deploy_key.pem $USER@$HOST << 'EOF'
+            cd demo  # Change this to your project directory
+            git pull origin main
+            export MIX_ENV=prod
+            mix deps.get
+            mix deps.compile
+            mix phx.digest
+            mix ecto.migrate
+            sudo systemctl restart phoenix_app  # Ensure a service is set up
+          EOF
